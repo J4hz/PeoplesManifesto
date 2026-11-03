@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Http;
  */
 class Turnstile implements ValidationRule
 {
+    /**
+     * Run even when the token field is missing, otherwise a bot could skip it by leaving it out.
+     */
+    public bool $implicit = true;
+
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $secret = config('services.turnstile.secret');

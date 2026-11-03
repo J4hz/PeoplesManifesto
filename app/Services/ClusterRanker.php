@@ -18,11 +18,7 @@ class ClusterRanker
 {
     public function recalculate(IssueCluster $cluster): IssueCluster
     {
-        $members = Submission::query()
-            ->join('cluster_memberships', 'cluster_memberships.submission_id', '=', 'submissions.id')
-            ->where('cluster_memberships.cluster_id', $cluster->id)
-            ->get(['submissions.id', 'submissions.area_id', 'submissions.severity', 'submissions.created_at']);
-
+        $members = $this->members($cluster);
         $residents = $this->residents($members);
 
         $severity = $this->clusterSeverity($residents);
@@ -52,6 +48,25 @@ class ClusterRanker
         $cluster->save();
 
         return $cluster;
+    }
+
+    /**
+     * Residents counted with the trust weighting applied, as used in the score.
+     */
+    public function weightedResidentCount(IssueCluster $cluster): float
+    {
+        return $this->weightedResidents($this->residents($this->members($cluster)));
+    }
+
+    /**
+     * @return Collection<int, Submission>
+     */
+    private function members(IssueCluster $cluster): Collection
+    {
+        return Submission::query()
+            ->join('cluster_memberships', 'cluster_memberships.submission_id', '=', 'submissions.id')
+            ->where('cluster_memberships.cluster_id', $cluster->id)
+            ->get(['submissions.id', 'submissions.area_id', 'submissions.severity', 'submissions.created_at']);
     }
 
     /**

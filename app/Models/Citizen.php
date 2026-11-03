@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Services\IdentityHasher;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Citizen extends Authenticatable
+class Citizen extends Authenticatable implements HasLocalePreference
 {
     use HasFactory, Notifiable;
 

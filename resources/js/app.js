@@ -56,7 +56,7 @@ Alpine.data('statusForm', () => ({
     choose(event) {
         this.status = event.target.value;
     },
-    isDone() {
+    get isDone() {
         return this.status === 'done';
     },
 }));

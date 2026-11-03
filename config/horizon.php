@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    'middleware' => ['web', 'auth:web', 'two-factor'],
 
     /*
     |--------------------------------------------------------------------------
@@ -197,33 +197,54 @@ return [
     */
 
     'defaults' => [
-        'supervisor-1' => [
+        // SMS and light work. Kept apart so a slow AI call never holds up an OTP.
+        'supervisor-general' => [
             'connection' => 'redis',
-            'queue' => ['default'],
+            'queue' => ['sms', 'default'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
             'maxTime' => 0,
             'maxJobs' => 0,
             'memory' => 128,
-            'tries' => 1,
+            'tries' => 3,
             'timeout' => 60,
+            'nice' => 0,
+        ],
+        // Calls to Anthropic and Voyage. Longer timeout, fewer workers.
+        'supervisor-ai' => [
+            'connection' => 'redis',
+            'queue' => ['intake', 'briefs'],
+            'balance' => 'auto',
+            'autoScalingStrategy' => 'time',
+            'maxProcesses' => 1,
+            'maxTime' => 0,
+            'maxJobs' => 0,
+            'memory' => 192,
+            'tries' => 5,
+            'timeout' => 300,
             'nice' => 0,
         ],
     ],
 
     'environments' => [
         'production' => [
-            'supervisor-1' => [
-                'maxProcesses' => 10,
+            'supervisor-general' => [
+                'maxProcesses' => 4,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
+            ],
+            'supervisor-ai' => [
+                'maxProcesses' => 3,
             ],
         ],
 
         'local' => [
-            'supervisor-1' => [
-                'maxProcesses' => 3,
+            'supervisor-general' => [
+                'maxProcesses' => 2,
+            ],
+            'supervisor-ai' => [
+                'maxProcesses' => 1,
             ],
         ],
     ],

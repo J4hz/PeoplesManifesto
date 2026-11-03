@@ -100,7 +100,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Model::shouldBeStrict(! $this->app->isProduction());
+        Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
 
         if (filled(config('app.trusted_proxies'))) {
             $proxies = config('app.trusted_proxies');
@@ -137,7 +137,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::define('admin', fn (User $user) => $user->is_active && $user->isAdmin());
         Gate::define('leader-dashboard', fn (User $user) => $user->is_active && $user->worksForLeader());
-        Gate::define('viewHorizon', fn (?User $user = null) => $user !== null && $user->is_active && $user->isAdmin());
     }
 
     /**
