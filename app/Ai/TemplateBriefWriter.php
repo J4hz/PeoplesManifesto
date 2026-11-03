@@ -44,7 +44,8 @@ class TemplateBriefWriter
         return [
             'brief' => implode("\n\n", $lines),
             'rising_topics' => collect($input['rising_issues'])->pluck('title')->take(5)->values()->all(),
-            'improving_topics' => collect($input['falling_issues'])->merge($input['marked_done_this_week'])->pluck('title')->unique()->take(5)->values()->all(),
+            // Only work leaders finished counts as improving. An issue that went quiet may simply be ignored.
+            'improving_topics' => collect($input['marked_done_this_week'])->pluck('title')->unique()->take(5)->values()->all(),
         ];
     }
 }

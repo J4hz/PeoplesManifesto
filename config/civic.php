@@ -73,7 +73,8 @@ return [
     'photos' => [
         'max_kilobytes' => 5120,
         'max_dimension' => 1600,
-        'disk' => 'local',
+        // "local" on a single server. On hosts where web and workers do not share a disk, a private S3 bucket.
+        'disk' => env('PHOTOS_DISK', 'local'),
     ],
 
     'otp' => [

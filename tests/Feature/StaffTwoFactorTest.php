@@ -2,6 +2,7 @@
 
 use App\Models\AuditLog;
 use App\Models\User;
+use PragmaRX\Google2FA\Google2FA;
 
 beforeEach(fn () => pilot());
 
@@ -40,7 +41,7 @@ it('lets a user turn on two factor and records it in the audit log', function ()
     $user->refresh();
     expect($user->two_factor_secret)->not->toBeNull();
 
-    $engine = app(\PragmaRX\Google2FA\Google2FA::class);
+    $engine = app(Google2FA::class);
     $code = $engine->getCurrentOtp(decrypt($user->two_factor_secret));
 
     $this->actingAs($user)

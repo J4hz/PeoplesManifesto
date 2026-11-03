@@ -1,59 +1,130 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# The People's Manifesto
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A non-partisan civic platform for Kenyan wards. Residents raise issues in their ward by phone or SMS. Reports about the same problem are grouped and ranked by how many residents raised them, how serious they are, how far they have spread and how fast they are growing. The right leader (MCA, MP, Governor and so on) sees the ranked list, posts public updates, and marks issues done. The residents who reported an issue then say whether it was really fixed. If most say no, it reopens.
 
-## About Laravel
+The pilot covers Ruiru constituency in Kiambu County. Wards, constituencies and counties are data, so new areas need no code changes.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Built with Laravel 12, Blade, PostgreSQL with pgvector, Redis, Horizon, Fortify, Africa's Talking and the Anthropic API. See `docs/PLAN.md` for the structure and `docs/DECISIONS.md` for the choices made along the way.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Run it locally with Sail
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+You need Docker, PHP 8.3 and Composer on the host for the first install.
 
-## Learning Laravel
+```bash
+cp .env.example .env
+composer install
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Then, in two more terminals:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+./vendor/bin/sail artisan horizon
+./vendor/bin/sail artisan schedule:work
+```
 
-## Laravel Sponsors
+Open http://localhost. Mail goes to Mailpit at http://localhost:8025.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+With no API keys set the app runs on local stand-ins: a keyword analyser instead of Claude, a hashing embedder instead of Voyage, SMS written to `storage/logs/laravel.log` instead of sent, and weekly briefs written from the figures. Sign-in codes for residents appear in that log.
 
-### Premium Partners
+### Demo accounts
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+`migrate --seed` loads the pilot wards and, in the local environment only, demo data. Every demo staff account uses the password `password` and the authenticator secret `JBSWY3DPEHPK3PXP`. Add that secret to any authenticator app by hand to get the six digit codes.
 
-## Contributing
+| Account | Email |
+| --- | --- |
+| Platform admin | admin@manifesto.test |
+| MCA for Kiuu | mca.kiuu@manifesto.test |
+| Staff for the MCA | clerk.kiuu@manifesto.test |
+| MP for Ruiru | mp.ruiru@manifesto.test |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Demo residents use the numbers 0700 000 001 to 0700 000 030. Staff sign in at `/staff/login`.
 
-## Code of Conduct
+### Tests and checks
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+./vendor/bin/sail test
+```
 
-## Security Vulnerabilities
+```bash
+./scripts/check-style.sh
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+The test suite needs Postgres with pgvector. Sail creates the `manifesto_test` database on first start.
 
-## License
+## Environment settings
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Every value lives in `.env`. `.env.example` lists them all with comments.
+
+| Setting | What it is for |
+| --- | --- |
+| `APP_KEY` | Encryption key for sessions and encrypted columns. Generate once with `php artisan key:generate`. |
+| `APP_URL` | The public address, with https in production. |
+| `APP_ENV`, `APP_DEBUG` | `production` and `false` on the live site. |
+| `APP_TIMEZONE` | Defaults to `Africa/Nairobi`. The scheduler uses it. |
+| `TRUSTED_PROXIES` | Proxy addresses whose forwarded headers are trusted. Cloudflare ranges, or `*` when the origin only accepts Cloudflare traffic. |
+| `IDENTITY_HASH_KEY` | Key for the phone number and identity hashes. Generate a long random value and never change it after launch. Required in production. |
+| `DB_*` or `DB_URL` | PostgreSQL 15 or newer with the pgvector extension. |
+| `REDIS_*` or `REDIS_URL` | Queues, cache and sessions. |
+| `SESSION_SECURE_COOKIE`, `SESSION_SAME_SITE`, `SESSION_ENCRYPT` | Cookie settings. Secure cookies are on by default in production. |
+| `MAIL_*` | Password reset links and reopen notices for leaders. |
+| `ANTHROPIC_API_KEY` | Claude for report intake (Haiku) and weekly briefs (Fable, through the Batches API). |
+| `AI_INTAKE_MODEL`, `AI_BRIEF_MODEL` | Model names. Defaults are `claude-haiku-5-5` and `claude-fable-5-1`. |
+| `AI_MONTHLY_CAP_USD` | Monthly AI budget. Weekly briefs pause at the cap. Intake continues up to 20 percent above it, then waits for the next month. |
+| `VOYAGE_API_KEY`, `VOYAGE_MODEL` | Embeddings for grouping similar reports. |
+| `CLUSTER_SIMILARITY_THRESHOLD` | How alike two reports must be to share an issue. 0.82 by default. |
+| `AT_USERNAME`, `AT_API_KEY`, `AT_SANDBOX` | Africa's Talking account. Use `sandbox` and `AT_SANDBOX=true` while testing. |
+| `AT_SHORT_CODE`, `AT_SENDER_ID` | The short code residents text, and the sender name for outgoing SMS. |
+| `AT_WEBHOOK_TOKEN` | Long random string. Africa's Talking does not sign callbacks, so this token in the callback URL is the check. |
+| `AT_WEBHOOK_IPS` | Optional comma separated list of Africa's Talking addresses to accept callbacks from. |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile on the sign-in and report forms. Missing keys fail closed in production. |
+| `SENTRY_LARAVEL_DSN` | Error reporting. Personal data is not sent. |
+| `PHOTOS_DISK` | `local` on a single server, `s3` where web and workers do not share a disk. Photos are never public. |
+| `AWS_*` | The private bucket for photos when `PHOTOS_DISK=s3`. |
+| `BACKUP_DISK`, `BACKUP_ARCHIVE_PASSWORD`, `BACKUP_S3_*`, `BACKUP_NOTIFY_EMAIL` | Encrypted daily backups. See `docs/RESTORE.md`. |
+| `OPERATOR_NAME`, `OPERATOR_PRIVACY_EMAIL`, `OPERATOR_ODPC_REGISTRATION` | Shown on the privacy notice once set. |
+
+## Deploy
+
+Production needs PHP 8.3, PostgreSQL with pgvector, Redis, a queue worker running Horizon, and the scheduler. Put Cloudflare in front with SSL set to Full (strict). Do not use shared cPanel hosting: there is no way to run Horizon or keep secrets out of the web root there.
+
+### Laravel Forge on a VPS
+
+1. Create a server in a region close to Kenya with PHP 8.3, PostgreSQL 17 and Redis.
+2. On the server, install pgvector: `sudo apt install postgresql-17-pgvector`, then in the database run `CREATE EXTENSION vector;`.
+3. Create the site from this repository. Paste `docs/deploy/forge-deploy.sh` as the deploy script.
+4. Fill in the environment from `.env.example` with `APP_ENV=production`, `APP_DEBUG=false` and real keys.
+5. Under Daemons, add `php artisan horizon`. Under Scheduler, turn on the Laravel scheduler.
+6. Issue a Let's Encrypt certificate, then switch Cloudflare to Full (strict).
+7. Create the first admin: `php artisan manifesto:create-admin you@example.org "Your Name"`.
+
+The deploy script runs `php artisan optimize`, which caches config, routes, views and events.
+
+### Render with Docker
+
+`render.yaml` describes a web service, a Horizon worker, a scheduler worker, Postgres 17 and Redis, all in Frankfurt. In the Render dashboard choose New, Blueprint, and pick this repository. Render asks for each secret once.
+
+Render services do not share a disk, so set `PHOTOS_DISK=s3` with a private bucket and `BACKUP_DISK=s3-backups`. Enable pgvector on the Render database with `CREATE EXTENSION vector;` before the first deploy. Migrations run before each deploy. Then open a shell on the web service and run `php artisan manifesto:create-admin`.
+
+### Cloudflare
+
+- Proxy the domain through Cloudflare and set SSL to Full (strict).
+- Allow only Cloudflare addresses to reach the origin, then set `TRUSTED_PROXIES`.
+- Create a Turnstile widget for the domain and set its two keys.
+- Exclude `/webhooks/africastalking/*` from Bot Fight Mode so Africa's Talking can reach it.
+- In Africa's Talking, set the SMS callback URL to `https://your-domain/webhooks/africastalking/{AT_WEBHOOK_TOKEN}/sms`.
+
+## Where things are
+
+- `app/Ai` Claude intake, briefs, schema checks, cost tracking and the spend cap
+- `app/Embeddings` Voyage client and the local hashing embedder
+- `app/Sms` Africa's Talking gateway and the SMS conversation
+- `app/Services` ranking, clustering, identity hashing, audit log, photo storage
+- `app/Policies` who may do what
+- `config/ranking.php` ranking weights
+- `config/civic.php` categories, routing of categories to offices, rating rules
+- `config/ai.php` models, prices and the monthly cap

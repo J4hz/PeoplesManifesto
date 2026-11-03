@@ -61,7 +61,7 @@ class LocalIntakeAnalyzer implements IntakeAnalyzer
         $ward = collect($wardNames)->first(fn ($name) => str_contains($lower, Str::lower($name))) ?? '';
 
         $clean = trim(preg_replace('/\s+/', ' ', $text));
-        $title = Str::of($clean)->words(10, '')->limit(80, '')->rtrim('.,;: ')->ucfirst()->toString();
+        $title = $this->title($clean);
 
         return IntakeSchema::validate([
             'language' => $language,
@@ -75,5 +75,21 @@ class LocalIntakeAnalyzer implements IntakeAnalyzer
             'contains_personal_info' => (bool) preg_match('/(\+?254|0)[17]\d{8}/', $text),
             'is_actionable' => mb_strlen($clean) >= 8,
         ], $wardNames, $areaNames);
+    }
+
+    /**
+     * The first sentence, cut at a word boundary if it runs past 80 characters.
+     */
+    private function title(string $text): string
+    {
+        $sentence = preg_split('/(?<=[.!?])\s+/', $text, 2)[0] ?? $text;
+        $sentence = rtrim($sentence, '.!? ');
+
+        if (mb_strlen($sentence) > 80) {
+            $sentence = mb_substr($sentence, 0, 80);
+            $sentence = preg_replace('/\s+\S*$/u', '', $sentence) ?: $sentence;
+        }
+
+        return Str::ucfirst(rtrim($sentence, ',;: '));
     }
 }

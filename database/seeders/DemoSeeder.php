@@ -6,12 +6,16 @@ use App\Actions\AddVoice;
 use App\Actions\CreateSubmission;
 use App\Actions\PostClusterUpdate;
 use App\Actions\RecordRating;
+use App\Ai\AnthropicClient;
+use App\Ai\SpendGuard;
+use App\Ai\TemplateBriefWriter;
 use App\Jobs\DispatchWeeklyBriefs;
 use App\Models\Citizen;
 use App\Models\IssueCluster;
 use App\Models\Leader;
 use App\Models\User;
 use App\Models\Ward;
+use App\Services\ClusterRanker;
 use App\Services\IdentityHasher;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -128,10 +132,10 @@ class DemoSeeder extends Seeder
             }
         }
 
-        $ranker = app(\App\Services\ClusterRanker::class);
+        $ranker = app(ClusterRanker::class);
         IssueCluster::all()->each(fn (IssueCluster $cluster) => $ranker->recalculate($cluster));
 
-        (new DispatchWeeklyBriefs)->handle(app(\App\Ai\AnthropicClient::class), app(\App\Ai\SpendGuard::class), app(\App\Ai\TemplateBriefWriter::class));
+        (new DispatchWeeklyBriefs)->handle(app(AnthropicClient::class), app(SpendGuard::class), app(TemplateBriefWriter::class));
     }
 
     private function leader(int $officeId, string $name, string $slug): Leader

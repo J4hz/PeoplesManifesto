@@ -3,6 +3,7 @@
 use App\Models\IssueCluster;
 use App\Models\Submission;
 use App\Models\SubmissionAuthor;
+use App\Services\ClusterRanker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -88,7 +89,7 @@ it('limits reports per resident', function () {
 
 it('counts a resident once when they add their voice', function () {
     $cluster = clusterWithReporters([citizen()]);
-    app(\App\Services\ClusterRanker::class)->recalculate($cluster);
+    app(ClusterRanker::class)->recalculate($cluster);
     $neighbour = citizen();
 
     $this->actingAs($neighbour, 'citizen')->post("/issues/{$cluster->id}/voice")->assertRedirect();
@@ -113,4 +114,19 @@ it('shows the public ward page without anything that identifies a resident', fun
         ->assertSee('Hakuna maji Kiuu')
         ->assertDontSee($citizen->phone)
         ->assertDontSee(substr($citizen->phone, 4));
+});
+
+it('serves a report photo only to its author and the leaders of that ward', function () {
+    Storage::fake('local');
+    $author = citizen();
+    $this->actingAs($author, 'citizen')->post('/reports', [
+        'body' => 'Burst pipe near the stage flooding the road',
+        'photo' => UploadedFile::fake()->image('pipe.jpg', 50, 40),
+    ]);
+    $submission = Submission::sole();
+
+    $this->actingAs($author, 'citizen')->get("/my-reports/{$submission->id}/photo")->assertOk()->assertHeader('Content-Type', 'image/jpeg');
+    $this->actingAs(citizen(), 'citizen')->get("/my-reports/{$submission->id}/photo")->assertForbidden();
+    $this->actingAs(leaderUser(leaderFor('mca', 'kiuu')), 'web')->get("/dashboard/submissions/{$submission->id}/photo")->assertOk();
+    $this->actingAs(leaderUser(leaderFor('mca', 'mwiki')), 'web')->get("/dashboard/submissions/{$submission->id}/photo")->assertForbidden();
 });

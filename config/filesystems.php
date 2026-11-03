@@ -33,9 +33,30 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Photos are served only through PhotoController, after a policy check.
+            'serve' => false,
             'throw' => false,
             'report' => false,
+        ],
+
+        // Backup archives, kept apart from the photos they contain.
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'serve' => false,
+            'throw' => true,
+        ],
+
+        // Off-server copy of the backups, any S3 compatible store.
+        's3-backups' => [
+            'driver' => 's3',
+            'key' => env('BACKUP_S3_KEY'),
+            'secret' => env('BACKUP_S3_SECRET'),
+            'region' => env('BACKUP_S3_REGION', 'auto'),
+            'bucket' => env('BACKUP_S3_BUCKET'),
+            'endpoint' => env('BACKUP_S3_ENDPOINT'),
+            'use_path_style_endpoint' => (bool) env('BACKUP_S3_PATH_STYLE', false),
+            'throw' => true,
         ],
 
         'public' => [

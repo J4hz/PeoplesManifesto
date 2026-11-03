@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Events\RecoveryCodesGenerated;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
-use Laravel\Fortify\Events\RecoveryCodesGenerated;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider

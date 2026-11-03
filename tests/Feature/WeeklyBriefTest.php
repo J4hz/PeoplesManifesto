@@ -1,5 +1,9 @@
 <?php
 
+use App\Ai\AnthropicClient;
+use App\Ai\SpendGuard;
+use App\Ai\TemplateBriefWriter;
+use App\Ai\UsageRecorder;
 use App\Jobs\DispatchWeeklyBriefs;
 use App\Jobs\PollBriefBatches;
 use App\Models\AiBatch;
@@ -13,12 +17,12 @@ beforeEach(fn () => pilot());
 
 function dispatchBriefs(): void
 {
-    (new DispatchWeeklyBriefs)->handle(app(\App\Ai\AnthropicClient::class), app(\App\Ai\SpendGuard::class), app(\App\Ai\TemplateBriefWriter::class));
+    (new DispatchWeeklyBriefs)->handle(app(AnthropicClient::class), app(SpendGuard::class), app(TemplateBriefWriter::class));
 }
 
 function pollBriefs(): void
 {
-    (new PollBriefBatches)->handle(app(\App\Ai\AnthropicClient::class), app(\App\Ai\UsageRecorder::class), app(\App\Ai\TemplateBriefWriter::class));
+    (new PollBriefBatches)->handle(app(AnthropicClient::class), app(UsageRecorder::class), app(TemplateBriefWriter::class));
 }
 
 it('writes template briefs for every active ward when there is no key', function () {

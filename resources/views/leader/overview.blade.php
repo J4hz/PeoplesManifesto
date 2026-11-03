@@ -99,7 +99,7 @@
                                 <td class="num">{{ $cluster->resident_count }}</td>
                                 <td><x-severity-tag :severity="$cluster->severity" /></td>
                                 <td class="num">{{ $cluster->areas_count }}</td>
-                                <td>
+                                <td class="nowrap">
                                     @if ($cluster->trend === 'rising')<x-icon name="trending-up" />@elseif ($cluster->trend === 'falling')<x-icon name="trending-down" />@endif
                                     {{ __('civic.trend.'.$cluster->trend) }}
                                 </td>

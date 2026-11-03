@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Pgvector\Laravel\Vector;
 
 class IssueCluster extends Model
@@ -124,9 +125,9 @@ class IssueCluster extends Model
     /**
      * Distinct citizen references of everyone who reported or added their voice.
      *
-     * @return \Illuminate\Support\Collection<int, string>
+     * @return Collection<int, string>
      */
-    public function reporterRefs(): \Illuminate\Support\Collection
+    public function reporterRefs(): Collection
     {
         return SubmissionAuthor::query()
             ->whereIn('submission_id', $this->memberships()->select('submission_id'))
@@ -143,9 +144,9 @@ class IssueCluster extends Model
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, Citizen>
+     * @return Collection<int, Citizen>
      */
-    public function reporters(): \Illuminate\Support\Collection
+    public function reporters(): Collection
     {
         $ids = SubmissionAuthor::query()
             ->whereIn('submission_id', $this->memberships()->select('submission_id'))

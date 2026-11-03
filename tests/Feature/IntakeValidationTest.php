@@ -1,12 +1,17 @@
 <?php
 
+use App\Actions\CreateSubmission;
 use App\Ai\ClaudeIntakeAnalyzer;
 use App\Ai\Contracts\IntakeAnalyzer;
 use App\Ai\IntakeSchema;
 use App\Ai\InvalidAiOutput;
+use App\Ai\SpendGuard;
+use App\Embeddings\Embedder;
 use App\Jobs\ProcessSubmission;
 use App\Models\AiUsageLog;
 use App\Models\Submission;
+use App\Services\Clusterer;
+use App\Services\ClusterRanker;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -48,7 +53,7 @@ function pendingSubmission(string $body = 'Hakuna maji Kiuu kwa wiki moja'): Sub
 {
     $citizen = citizen();
 
-    return app(\App\Actions\CreateSubmission::class)->handle($citizen, ['body' => $body], null, 'app');
+    return app(CreateSubmission::class)->handle($citizen, ['body' => $body], null, 'app');
 }
 
 it('uses the Claude analyser when a key is set', function () {
@@ -91,7 +96,7 @@ it('marks the report unprocessed and retries when the output is not valid', func
     $submission = Submission::create(['ward_id' => $citizen->ward_id, 'kind' => 'report', 'channel' => 'app', 'body' => 'Hakuna maji', 'processing_status' => 'pending']);
 
     expect(fn () => (new ProcessSubmission($submission->id))->handle(
-        app(IntakeAnalyzer::class), app(\App\Embeddings\Embedder::class), app(\App\Services\Clusterer::class), app(\App\Services\ClusterRanker::class), app(\App\Ai\SpendGuard::class),
+        app(IntakeAnalyzer::class), app(Embedder::class), app(Clusterer::class), app(ClusterRanker::class), app(SpendGuard::class),
     ))->toThrow(InvalidAiOutput::class);
 
     $fresh = $submission->fresh();
@@ -117,7 +122,7 @@ it('marks the report unprocessed and retries when the output is not valid', func
 it('keeps the resident\'s own category and severity over the model\'s', function () {
     Http::fake(['api.anthropic.com/*' => Http::response(claudeReply(validIntake(['category' => 'roads', 'severity' => 'annoying'])))]);
 
-    $submission = app(\App\Actions\CreateSubmission::class)->handle(citizen(), ['body' => 'Hakuna maji', 'category' => 'water', 'severity' => 'urgent'], null, 'app');
+    $submission = app(CreateSubmission::class)->handle(citizen(), ['body' => 'Hakuna maji', 'category' => 'water', 'severity' => 'urgent'], null, 'app');
 
     expect($submission->fresh()->category)->toBe('water')
         ->and($submission->fresh()->severity)->toBe('urgent');
@@ -146,7 +151,7 @@ it('holds intake back once spend passes the hard ceiling', function () {
     $submission = Submission::create(['ward_id' => $citizen->ward_id, 'kind' => 'report', 'channel' => 'app', 'body' => 'Hakuna maji', 'processing_status' => 'pending']);
 
     $job = (new ProcessSubmission($submission->id))->withFakeQueueInteractions();
-    $job->handle(app(IntakeAnalyzer::class), app(\App\Embeddings\Embedder::class), app(\App\Services\Clusterer::class), app(\App\Services\ClusterRanker::class), app(\App\Ai\SpendGuard::class));
+    $job->handle(app(IntakeAnalyzer::class), app(Embedder::class), app(Clusterer::class), app(ClusterRanker::class), app(SpendGuard::class));
 
     $job->assertReleased(3600);
     Http::assertNothingSent();

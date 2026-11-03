@@ -1,5 +1,16 @@
 <?php
 
+use Spatie\Backup\Notifications\Notifiable;
+use Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification;
+use Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification;
+use Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification;
+use Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification;
+use Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification;
+use Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification;
+use Spatie\Backup\Tasks\Cleanup\Strategies\DefaultStrategy;
+use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays;
+use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
+
 return [
 
     'backup' => [
@@ -7,15 +18,17 @@ return [
          * The name of this application. You can use this name to monitor
          * the backups.
          */
-        'name' => env('APP_NAME', 'laravel-backup'),
+        // A plain name, because it becomes a folder name on the backup disk.
+        'name' => env('BACKUP_NAME', 'peoples-manifesto'),
 
         'source' => [
             'files' => [
                 /*
                  * The list of directories and files that will be included in the backup.
                  */
+                // Code lives in git. The database and the uploaded photos are what cannot be rebuilt.
                 'include' => [
-                    base_path(),
+                    storage_path('app/private'),
                 ],
 
                 /*
@@ -150,9 +163,7 @@ return [
             /*
              * The disk names on which the backups will be stored.
              */
-            'disks' => [
-                'local',
-            ],
+            'disks' => array_filter(explode(',', (string) env('BACKUP_DISK', 'backups'))),
 
             /*
              * Determines whether to allow backups to continue when some targets fail instead of failing completely.
@@ -201,22 +212,22 @@ return [
      */
     'notifications' => [
         'notifications' => [
-            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => ['mail'],
-            \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => ['mail'],
+            BackupHasFailedNotification::class => ['mail'],
+            UnhealthyBackupWasFoundNotification::class => ['mail'],
+            CleanupHasFailedNotification::class => ['mail'],
+            BackupWasSuccessfulNotification::class => ['mail'],
+            HealthyBackupWasFoundNotification::class => ['mail'],
+            CleanupWasSuccessfulNotification::class => ['mail'],
         ],
 
         /*
          * Here you can specify the notifiable to which the notifications should be sent. The default
          * notifiable will use the variables specified in this config file.
          */
-        'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
+        'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => env('BACKUP_NOTIFY_EMAIL', env('MAIL_FROM_ADDRESS')),
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
@@ -259,11 +270,11 @@ return [
      */
     'monitor_backups' => [
         [
-            'name' => env('APP_NAME', 'laravel-backup'),
-            'disks' => ['local'],
+            'name' => env('BACKUP_NAME', 'peoples-manifesto'),
+            'disks' => array_filter(explode(',', (string) env('BACKUP_DISK', 'backups'))),
             'health_checks' => [
-                \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1,
-                \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 5000,
+                MaximumAgeInDays::class => 1,
+                MaximumStorageInMegabytes::class => 5000,
             ],
         ],
 
@@ -289,7 +300,7 @@ return [
          * No matter how you configure it the default strategy will never
          * delete the newest backup.
          */
-        'strategy' => \Spatie\Backup\Tasks\Cleanup\Strategies\DefaultStrategy::class,
+        'strategy' => DefaultStrategy::class,
 
         'default_strategy' => [
             /*

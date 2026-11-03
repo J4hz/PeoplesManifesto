@@ -224,7 +224,8 @@ class ClusterRanker
         if ($growth['ratio'] > $g['rising_above']) {
             return 'rising';
         }
-        if ($growth['ratio'] < $g['falling_below']) {
+        // One or two quiet residents are not a trend. Falling needs a real drop.
+        if ($growth['ratio'] < $g['falling_below'] && $growth['previous'] >= 2) {
             return 'falling';
         }
 

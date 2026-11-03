@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
@@ -128,6 +129,9 @@ class AppServiceProvider extends ServiceProvider
         Notification::resolved(function (ChannelManager $manager) {
             $manager->extend('sms', fn ($app) => $app->make(SmsChannel::class));
         });
+
+        // The breached-password check calls an outside service, so it runs only in production.
+        Password::defaults(fn () => $this->app->isProduction() ? Password::min(12)->uncompromised() : Password::min(12));
 
         $this->defineGates();
         $this->defineRateLimits();

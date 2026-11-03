@@ -6,6 +6,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Re-encodes every upload with GD. Re-encoding drops all EXIF data, GPS position
@@ -36,9 +37,14 @@ class PhotoStore
         return $path;
     }
 
-    public function path(string $path): string
+    /**
+     * Streams a stored photo. Works for the local disk and for a private S3 bucket.
+     *
+     * @param  array<string, string>  $headers
+     */
+    public function response(string $path, array $headers): StreamedResponse
     {
-        return Storage::disk(config('civic.photos.disk'))->path($path);
+        return Storage::disk(config('civic.photos.disk'))->response($path, null, $headers);
     }
 
     public function exists(?string $path): bool

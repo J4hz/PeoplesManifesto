@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Support\Facades\Http;
+
 beforeEach(fn () => pilot());
 
 it('sends a content security policy with a nonce and no unsafe-eval', function () {
@@ -44,7 +47,7 @@ it('puts a CSRF token in every form that changes something', function () {
 it('fails Turnstile closed in production when no secret is set', function () {
     app()->detectEnvironment(fn () => 'production');
 
-    $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+    $this->withoutMiddleware(ValidateCsrfToken::class)
         ->post('/sign-in', ['phone' => '0712345678'])
         ->assertSessionHasErrors('cf-turnstile-response');
 });
@@ -59,7 +62,7 @@ it('rejects form posts without a CSRF token outside of tests', function () {
 
 it('checks the Turnstile token with Cloudflare when a secret is set', function () {
     config(['services.turnstile.secret' => 'secret']);
-    \Illuminate\Support\Facades\Http::fake(['challenges.cloudflare.com/*' => \Illuminate\Support\Facades\Http::response(['success' => false])]);
+    Http::fake(['challenges.cloudflare.com/*' => Http::response(['success' => false])]);
 
     $this->post('/sign-in', ['phone' => '0712345678', 'cf-turnstile-response' => 'token'])->assertSessionHasErrors('cf-turnstile-response');
 });

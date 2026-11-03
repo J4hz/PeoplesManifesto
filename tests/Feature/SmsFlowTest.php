@@ -4,7 +4,10 @@ use App\Jobs\SendSms;
 use App\Models\Citizen;
 use App\Models\Rating;
 use App\Models\Submission;
+use App\Services\IdentityHasher;
+use App\Sms\SmsGateway;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
     pilot();
@@ -87,7 +90,7 @@ it('asks again when the ward number is not on the list', function () {
 });
 
 it('records a verdict sent by SMS for the latest done issue', function () {
-    $citizen = Citizen::factory()->inWard(ward())->create(['phone' => '+254711222333', 'phone_hash' => app(\App\Services\IdentityHasher::class)->phone('+254711222333')]);
+    $citizen = Citizen::factory()->inWard(ward())->create(['phone' => '+254711222333', 'phone_hash' => app(IdentityHasher::class)->phone('+254711222333')]);
     $cluster = clusterWithReporters([$citizen], ['status' => 'done', 'done_round' => 1, 'done_at' => now()]);
 
     sms('3')->assertOk();
@@ -101,7 +104,7 @@ it('records a verdict sent by SMS for the latest done issue', function () {
 });
 
 it('stops updates when a resident replies STOP', function () {
-    $citizen = Citizen::factory()->inWard(ward())->create(['phone' => '+254711222333', 'phone_hash' => app(\App\Services\IdentityHasher::class)->phone('+254711222333')]);
+    $citizen = Citizen::factory()->inWard(ward())->create(['phone' => '+254711222333', 'phone_hash' => app(IdentityHasher::class)->phone('+254711222333')]);
 
     sms('stop');
 
@@ -118,13 +121,13 @@ it('limits inbound messages per phone number', function () {
 
 it('sends SMS through Africa\'s Talking when a key is set', function () {
     config(['services.africastalking.api_key' => 'at-key', 'services.africastalking.short_code' => '12345']);
-    \Illuminate\Support\Facades\Http::fake([
-        'api.sandbox.africastalking.com/*' => \Illuminate\Support\Facades\Http::response(['SMSMessageData' => ['Recipients' => [['status' => 'Success']]]]),
+    Http::fake([
+        'api.sandbox.africastalking.com/*' => Http::response(['SMSMessageData' => ['Recipients' => [['status' => 'Success']]]]),
     ]);
 
-    app(\App\Sms\SmsGateway::class)->send('+254711222333', 'Test message');
+    app(SmsGateway::class)->send('+254711222333', 'Test message');
 
-    \Illuminate\Support\Facades\Http::assertSent(fn ($r) => $r->url() === 'https://api.sandbox.africastalking.com/version1/messaging'
+    Http::assertSent(fn ($r) => $r->url() === 'https://api.sandbox.africastalking.com/version1/messaging'
         && $r->hasHeader('apiKey', 'at-key')
         && $r['to'] === '+254711222333'
         && $r['username'] === 'sandbox');

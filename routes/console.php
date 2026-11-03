@@ -14,7 +14,7 @@ Schedule::job(new DispatchWeeklyBriefs)->weeklyOn(1, '05:30')->name('weekly-brie
 Schedule::job(new PollBriefBatches)->everyFifteenMinutes()->name('poll-brief-batches')->onOneServer();
 
 Schedule::command('backup:clean')->dailyAt('01:00')->onOneServer();
-Schedule::command('backup:run --only-db')->dailyAt('01:30')->onOneServer();
+Schedule::command('backup:run')->dailyAt('01:30')->onOneServer();
 Schedule::command('backup:monitor')->dailyAt('07:00')->onOneServer();
 
 Schedule::command('horizon:snapshot')->everyFiveMinutes();

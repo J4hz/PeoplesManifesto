@@ -3,8 +3,10 @@
 use App\Jobs\CheckDoneClusters;
 use App\Models\AuditLog;
 use App\Models\IssueCluster;
+use App\Models\Leader;
 use App\Models\Rating;
 use App\Notifications\IssueReopened;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
@@ -15,7 +17,7 @@ beforeEach(function () {
 /**
  * @param  array<string, int>  $verdicts
  */
-function doneClusterWithRatings(array $verdicts, int $daysSinceDone, ?\App\Models\Leader $leader = null): IssueCluster
+function doneClusterWithRatings(array $verdicts, int $daysSinceDone, ?Leader $leader = null): IssueCluster
 {
     $leader ??= leaderFor();
     $cluster = IssueCluster::factory()->create([
@@ -41,7 +43,7 @@ it('reopens after seven days when more than half say not fixed, and tells the le
     $user = leaderUser($leader);
     $cluster = doneClusterWithRatings(['not_fixed' => 3, 'fixed' => 1, 'partly' => 1], 8, $leader);
 
-    (new CheckDoneClusters)->handle(app(\App\Services\AuditLogger::class));
+    (new CheckDoneClusters)->handle(app(AuditLogger::class));
 
     $cluster->refresh();
     expect($cluster->status)->toBe('reopened')
@@ -55,7 +57,7 @@ it('reopens after seven days when more than half say not fixed, and tells the le
 it('decides early once twenty residents have rated', function () {
     $cluster = doneClusterWithRatings(['not_fixed' => 11, 'fixed' => 9], 2);
 
-    (new CheckDoneClusters)->handle(app(\App\Services\AuditLogger::class));
+    (new CheckDoneClusters)->handle(app(AuditLogger::class));
 
     expect($cluster->fresh()->status)->toBe('reopened');
 });
@@ -63,7 +65,7 @@ it('decides early once twenty residents have rated', function () {
 it('waits while the window is open and fewer than twenty have rated', function () {
     $cluster = doneClusterWithRatings(['not_fixed' => 15], 3);
 
-    (new CheckDoneClusters)->handle(app(\App\Services\AuditLogger::class));
+    (new CheckDoneClusters)->handle(app(AuditLogger::class));
 
     expect($cluster->fresh()->status)->toBe('done')
         ->and($cluster->fresh()->rating_window_closed_at)->toBeNull();
@@ -72,7 +74,7 @@ it('waits while the window is open and fewer than twenty have rated', function (
 it('keeps the issue done when exactly half say not fixed', function () {
     $cluster = doneClusterWithRatings(['not_fixed' => 2, 'fixed' => 1, 'partly' => 1], 8);
 
-    (new CheckDoneClusters)->handle(app(\App\Services\AuditLogger::class));
+    (new CheckDoneClusters)->handle(app(AuditLogger::class));
 
     expect($cluster->fresh()->status)->toBe('done')
         ->and($cluster->fresh()->rating_window_closed_at)->not->toBeNull();
@@ -82,7 +84,7 @@ it('keeps the issue done when exactly half say not fixed', function () {
 it('closes the window with no change when nobody rated', function () {
     $cluster = doneClusterWithRatings([], 8);
 
-    (new CheckDoneClusters)->handle(app(\App\Services\AuditLogger::class));
+    (new CheckDoneClusters)->handle(app(AuditLogger::class));
 
     expect($cluster->fresh()->status)->toBe('done')
         ->and($cluster->fresh()->rating_window_closed_at)->not->toBeNull();
@@ -94,7 +96,7 @@ it('only counts ratings from the current Done round', function () {
         Rating::create(['cluster_id' => $cluster->id, 'round' => 2, 'citizen_ref' => 'r2-'.$i, 'verdict' => 'not_fixed', 'channel' => 'app']);
     }
 
-    (new CheckDoneClusters)->handle(app(\App\Services\AuditLogger::class));
+    (new CheckDoneClusters)->handle(app(AuditLogger::class));
 
     expect($cluster->fresh()->status)->toBe('done');
 });

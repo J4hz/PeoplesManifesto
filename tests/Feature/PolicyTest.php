@@ -4,7 +4,6 @@ use App\Models\AuditLog;
 use App\Models\ClusterUpdate;
 use App\Models\IssueCluster;
 use App\Models\Rating;
-use App\Models\Submission;
 use Illuminate\Support\Facades\Gate;
 
 beforeEach(fn () => pilot());

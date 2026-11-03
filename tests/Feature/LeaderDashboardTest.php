@@ -2,10 +2,11 @@
 
 use App\Models\AuditLog;
 use App\Models\ClusterUpdate;
-use App\Models\IssueCluster;
+use App\Models\Rating;
 use App\Notifications\IssueMarkedDone;
 use App\Notifications\IssueUpdated;
 use App\Services\ClusterRanker;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(fn () => pilot());
@@ -41,7 +42,7 @@ it('shows anonymous samples with translations and no phone numbers', function ()
 
 it('leaves out samples flagged for personal details', function () {
     $cluster = clusterWithReporters([citizen()]);
-    \Illuminate\Support\Facades\DB::table('submissions')->update(['contains_personal_info' => true, 'translation' => 'Call Wanjiku on [phone]']);
+    DB::table('submissions')->update(['contains_personal_info' => true, 'translation' => 'Call Wanjiku on [phone]']);
 
     $this->actingAs(leaderUser())->get("/dashboard/issues/{$cluster->id}")
         ->assertOk()
@@ -139,7 +140,7 @@ it('shows the leader their rating record', function () {
     $leader = leaderFor();
     $reporter = citizen();
     $cluster = clusterWithReporters([$reporter], ['status' => 'done', 'done_round' => 1, 'done_at' => now(), 'done_by_leader_id' => $leader->id]);
-    \App\Models\Rating::create(['cluster_id' => $cluster->id, 'round' => 1, 'leader_id' => $leader->id, 'citizen_ref' => $reporter->ref(), 'verdict' => 'fixed', 'stars' => 4, 'praise_tags' => ['fast_response'], 'thanks' => 'Asante sana for the quick work', 'channel' => 'app']);
+    Rating::create(['cluster_id' => $cluster->id, 'round' => 1, 'leader_id' => $leader->id, 'citizen_ref' => $reporter->ref(), 'verdict' => 'fixed', 'stars' => 4, 'praise_tags' => ['fast_response'], 'thanks' => 'Asante sana for the quick work', 'channel' => 'app']);
 
     $this->actingAs(leaderUser($leader))->get('/dashboard/ratings')
         ->assertOk()

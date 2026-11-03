@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Ai\Contracts\IntakeAnalyzer;
-use App\Ai\InvalidAiOutput;
 use App\Ai\IntakeResult;
+use App\Ai\InvalidAiOutput;
 use App\Ai\SpendGuard;
 use App\Embeddings\Embedder;
 use App\Models\Area;

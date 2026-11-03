@@ -1,11 +1,14 @@
 <?php
 
+use App\Jobs\ProcessSubmission;
+use App\Models\AiUsageLog;
 use App\Models\AuditLog;
 use App\Models\Leader;
 use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(fn () => pilot());
@@ -34,7 +37,7 @@ it('shows admins the failed intake queue without the report text and lets them r
     Bus::fake();
     $citizen = citizen();
     $submission = Submission::create(['ward_id' => $citizen->ward_id, 'kind' => 'report', 'channel' => 'app', 'body' => 'Private words of a resident', 'processing_status' => 'failed', 'processing_error' => 'Intake output failed validation']);
-    \Illuminate\Support\Facades\DB::table('submissions')->where('id', $submission->id)->update(['processing_status' => 'failed']);
+    DB::table('submissions')->where('id', $submission->id)->update(['processing_status' => 'failed']);
     $this->travel(20)->minutes();
 
     $admin = adminUser();
@@ -43,7 +46,7 @@ it('shows admins the failed intake queue without the report text and lets them r
         ->assertDontSee('Private words of a resident');
 
     $this->actingAs($admin)->post("/admin/intake/{$submission->id}/retry")->assertRedirect();
-    Bus::assertDispatched(\App\Jobs\ProcessSubmission::class);
+    Bus::assertDispatched(ProcessSubmission::class);
     expect($submission->fresh()->processing_status)->toBe('pending');
 });
 
@@ -58,7 +61,7 @@ it('lets an admin suspend a leader but not themselves', function () {
 });
 
 it('shows AI cost per ward per week', function () {
-    \App\Models\AiUsageLog::create(['job' => 'intake', 'model' => 'claude-haiku-5-5', 'ward_id' => ward()->id, 'input_tokens' => 100, 'output_tokens' => 50, 'cost_usd' => 0.0123]);
+    AiUsageLog::create(['job' => 'intake', 'model' => 'claude-haiku-5-5', 'ward_id' => ward()->id, 'input_tokens' => 100, 'output_tokens' => 50, 'cost_usd' => 0.0123]);
 
     $this->actingAs(adminUser())->get('/admin/ai-usage')->assertOk()->assertSee('Kiuu')->assertSee('$0.0123');
 });

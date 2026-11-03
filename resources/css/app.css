@@ -965,3 +965,16 @@ ul.chips {
     border-color: var(--green);
     color: var(--green-dark);
 }
+
+figure.quote,
+.quote blockquote {
+    margin: 0;
+}
+
+figure.quote blockquote {
+    margin-bottom: 6px;
+}
+
+.nowrap {
+    white-space: nowrap;
+}

@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Citizen;
-use App\Http\Controllers\Leader;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Leader;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\Public;
 use App\Http\Controllers\StaffSecurityController;
@@ -44,7 +44,7 @@ Route::middleware('auth:citizen')->group(function () {
         Route::get('/issues/{cluster}/rate', [Citizen\RatingController::class, 'create'])->name('citizen.rate');
         Route::post('/issues/{cluster}/rate', [Citizen\RatingController::class, 'store'])->middleware('throttle:ratings')->name('citizen.rate.store');
         Route::get('/my-reports', [Citizen\MyReportsController::class, 'index'])->name('citizen.reports');
-        Route::get('/my-reports/{submission}/photo', [PhotoController::class, 'submission'])->name('citizen.reports.photo');
+        Route::get('/my-reports/{submission}/photo', [PhotoController::class, 'citizenSubmission'])->name('citizen.reports.photo');
         Route::get('/account', [Citizen\AccountController::class, 'edit'])->name('citizen.account');
         Route::put('/account', [Citizen\AccountController::class, 'update'])->name('citizen.account.update');
         Route::delete('/account', [Citizen\AccountController::class, 'destroy'])->name('citizen.account.destroy');
@@ -64,7 +64,7 @@ Route::middleware(['auth:web', 'two-factor', 'can:leader-dashboard'])->prefix('d
     Route::post('/issues/{cluster}/updates', [Leader\UpdateController::class, 'store'])->name('.updates.store');
     Route::post('/updates/{update}/publish', [Leader\UpdateController::class, 'publish'])->name('.updates.publish');
     Route::delete('/updates/{update}', [Leader\UpdateController::class, 'destroy'])->name('.updates.destroy');
-    Route::get('/submissions/{submission}/photo', [PhotoController::class, 'submission'])->name('.submissions.photo');
+    Route::get('/submissions/{submission}/photo', [PhotoController::class, 'leaderSubmission'])->name('.submissions.photo');
     Route::get('/ratings', [Leader\RatingRecordController::class, 'index'])->name('.ratings');
     Route::get('/audit', [Leader\AuditLogController::class, 'index'])->name('.audit');
 });

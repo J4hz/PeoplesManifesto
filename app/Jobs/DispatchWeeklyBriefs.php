@@ -10,6 +10,7 @@ use App\Ai\TemplateBriefWriter;
 use App\Models\AiBatch;
 use App\Models\Ward;
 use App\Models\WeeklyBrief;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -78,7 +79,7 @@ class DispatchWeeklyBriefs implements ShouldQueue
      * @param  array{brief: string, rising_topics: list<string>, improving_topics: list<string>}  $brief
      * @param  array<string, mixed>  $input
      */
-    public static function store(Ward $ward, \Carbon\CarbonInterface $weekStart, array $brief, array $input, string $source, ?string $model = null, ?int $batchId = null): WeeklyBrief
+    public static function store(Ward $ward, CarbonInterface $weekStart, array $brief, array $input, string $source, ?string $model = null, ?int $batchId = null): WeeklyBrief
     {
         return WeeklyBrief::updateOrCreate(
             ['ward_id' => $ward->id, 'week_start' => $weekStart->toDateString()],

@@ -1,0 +1,154 @@
+# Render Blueprint. In the Render dashboard: New, Blueprint, pick this repository.
+# Secrets marked "sync: false" are asked for once when the Blueprint is created.
+
+envVarGroups:
+  - name: manifesto-env
+    envVars:
+      - key: APP_NAME
+        value: "People's Manifesto"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: TRUSTED_PROXIES
+        value: "*"
+      - key: IDENTITY_HASH_KEY
+        sync: false
+      - key: LOG_LEVEL
+        value: warning
+      - key: SESSION_DRIVER
+        value: redis
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: redis
+      - key: QUEUE_CONNECTION
+        value: redis
+      - key: PHOTOS_DISK
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AI_MONTHLY_CAP_USD
+        value: "50"
+      - key: VOYAGE_API_KEY
+        sync: false
+      - key: AT_USERNAME
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_SANDBOX
+        value: "false"
+      - key: AT_SHORT_CODE
+        sync: false
+      - key: AT_WEBHOOK_TOKEN
+        sync: false
+      - key: TURNSTILE_SITE_KEY
+        sync: false
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+      - key: SENTRY_LARAVEL_DSN
+        sync: false
+      - key: MAIL_MAILER
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: BACKUP_DISK
+        value: s3-backups
+      - key: BACKUP_ARCHIVE_PASSWORD
+        sync: false
+      - key: BACKUP_S3_KEY
+        sync: false
+      - key: BACKUP_S3_SECRET
+        sync: false
+      - key: BACKUP_S3_BUCKET
+        sync: false
+      - key: BACKUP_S3_ENDPOINT
+        sync: false
+
+services:
+  - type: web
+    name: manifesto-web
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    healthCheckPath: /up
+    preDeployCommand: php artisan migrate --force
+    envVars:
+      - fromGroup: manifesto-env
+      - key: PORT
+        value: "8080"
+      - key: DB_URL
+        fromDatabase:
+          name: manifesto-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: manifesto-redis
+          property: connectionString
+
+  - type: worker
+    name: manifesto-horizon
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerCommand: php artisan horizon
+    envVars:
+      - fromGroup: manifesto-env
+      - key: DB_URL
+        fromDatabase:
+          name: manifesto-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: manifesto-redis
+          property: connectionString
+
+  - type: worker
+    name: manifesto-scheduler
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerCommand: php artisan schedule:work
+    envVars:
+      - fromGroup: manifesto-env
+      - key: DB_URL
+        fromDatabase:
+          name: manifesto-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: manifesto-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: manifesto-redis
+    region: frankfurt
+    plan: starter
+    # Queued jobs must never be evicted.
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+databases:
+  - name: manifesto-db
+    region: frankfurt
+    plan: basic-256mb
+    databaseName: manifesto
+    user: manifesto
+    postgresMajorVersion: "17"

@@ -26,7 +26,7 @@ class BriefPrompt
 
     /**
      * @param  array<string, mixed>  $input
-     * @return array<string, mixed>  request params for the Messages API
+     * @return array<string, mixed> request params for the Messages API
      */
     public static function params(array $input): array
     {

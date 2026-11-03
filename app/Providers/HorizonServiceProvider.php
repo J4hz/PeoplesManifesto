@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Horizon\Horizon;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
 
 class HorizonServiceProvider extends HorizonApplicationServiceProvider
@@ -24,6 +25,6 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     {
         $this->gate();
 
-        \Laravel\Horizon\Horizon::auth(fn ($request) => Gate::forUser($request->user('web'))->check('viewHorizon'));
+        Horizon::auth(fn ($request) => Gate::forUser($request->user('web'))->check('viewHorizon'));
     }
 }

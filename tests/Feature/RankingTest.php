@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Area;
-use App\Models\Citizen;
 use App\Services\ClusterRanker;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(fn () => pilot());
 
@@ -54,7 +54,7 @@ it('counts spread from the areas residents reported from', function () {
     $ward = ward();
     $areas = collect(['Zone A', 'Zone B', 'Zone C', 'Zone D'])->map(fn ($n) => Area::create(['ward_id' => $ward->id, 'name' => $n]));
     $cluster = clusterWithReporters([citizen(), citizen(), citizen()]);
-    $cluster->submissions()->get()->each(fn ($s, $i) => \Illuminate\Support\Facades\DB::table('submissions')->where('id', $s->id)->update(['area_id' => $areas[$i % 2]->id]));
+    $cluster->submissions()->get()->each(fn ($s, $i) => DB::table('submissions')->where('id', $s->id)->update(['area_id' => $areas[$i % 2]->id]));
 
     ranker()->recalculate($cluster);
 
