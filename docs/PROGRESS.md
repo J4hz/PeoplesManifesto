@@ -34,6 +34,8 @@ Phases 2 to 8 were built together and landed in one commit once the whole suite 
 
 ## What I need you to do
 
+Hosting is Laravel Cloud. Follow `docs/deploy/laravel-cloud.md` step by step. Before launch, confirm that the Cloud image has the `gd`, `exif` and `redis` PHP extensions and `pg_dump`, and run `php artisan backup:run` once to see an archive land in the backups bucket.
+
 1. Keys: create an Anthropic API key, a Voyage AI key and an Africa's Talking account, and put them in `.env`. Check the prices in `config/ai.php` against the current pricing pages and set `AI_MONTHLY_CAP_USD`.
 2. Africa's Talking: test in the sandbox first, then apply for a short code (and a sender ID if you want named SMS). Set `AT_WEBHOOK_TOKEN` to a long random string and point the SMS callback at `https://your-domain/webhooks/africastalking/{token}/sms`. Ask Africa's Talking for their callback IP ranges and set `AT_WEBHOOK_IPS`. Confirm whether inbound SMS will be free to residents.
 3. Cloudflare: proxy the domain, SSL Full (strict), lock the origin to Cloudflare addresses, set `TRUSTED_PROXIES`, create a Turnstile widget and set both keys, and exclude the webhook path from Bot Fight Mode.

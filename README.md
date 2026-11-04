@@ -90,7 +90,20 @@ Every value lives in `.env`. `.env.example` lists them all with comments.
 
 ## Deploy
 
-Production needs PHP 8.3, PostgreSQL with pgvector, Redis, a queue worker running Horizon, and the scheduler. Put Cloudflare in front with SSL set to Full (strict). Do not use shared cPanel hosting: there is no way to run Horizon or keep secrets out of the web root there.
+Production needs PHP 8.3, PostgreSQL with pgvector, Redis, a queue worker running Horizon, and the scheduler. Do not use shared cPanel hosting: there is no way to run Horizon or keep secrets out of the web root there.
+
+### Laravel Cloud
+
+This is the planned host. The full checklist is in `docs/deploy/laravel-cloud.md`. In short:
+
+1. Create the application from this repository in the EU Central (Frankfurt) region, on PHP 8.3 or newer.
+2. Attach a Laravel Serverless Postgres database (pgvector is supported, and the migrations create the extension) and a Valkey store. Turn database hibernation off for production so SMS callbacks are not slowed by a cold start.
+3. Add a worker cluster that never scales to zero. Give it a background process running `php artisan horizon` and turn its Scheduler toggle on.
+4. Attach two private buckets, one for photos and one for backups, and set `PHOTOS_DISK` and `BACKUP_DISK` to their disk names.
+5. Build commands: `composer install --no-dev`, `npm ci`, `npm run build`, `php artisan optimize`. Deploy command: `php artisan migrate --force`.
+6. Add the custom environment variables listed in the guide, including `QUEUE_CONNECTION=redis`, then deploy and create the first admin with `php artisan manifesto:create-admin`.
+
+The VPS and Docker options below need Cloudflare in front with SSL set to Full (strict).
 
 ### Laravel Forge on a VPS
 
