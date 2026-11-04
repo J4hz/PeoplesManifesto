@@ -227,10 +227,12 @@ return [
         'notifiable' => Notifiable::class,
 
         'mail' => [
-            'to' => env('BACKUP_NOTIFY_EMAIL', env('MAIL_FROM_ADDRESS')),
+            // The backup package rejects an empty address at boot, which would break every
+            // deploy that has not set mail up yet, so there is always a fallback.
+            'to' => env('BACKUP_NOTIFY_EMAIL') ?: env('MAIL_FROM_ADDRESS') ?: 'hello@example.com',
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+                'address' => env('MAIL_FROM_ADDRESS') ?: 'hello@example.com',
                 'name' => env('MAIL_FROM_NAME', 'Example'),
             ],
         ],
