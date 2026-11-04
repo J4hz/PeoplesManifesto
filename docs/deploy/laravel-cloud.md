@@ -31,7 +31,7 @@ php artisan migrate --force
 APP_NAME="People's Manifesto"
 APP_ENV=demo
 APP_DEBUG=false
-APP_URL=https://your-app.laravel.cloud
+APP_URL=https://thepeoplesmanifesto.co.ke
 DEMO_MODE=true
 DEMO_STAFF_PASSWORD=choose-a-password-to-share
 IDENTITY_HASH_KEY=paste-a-random-value
@@ -150,7 +150,7 @@ Cloud injects the database, Valkey and bucket settings. Add the rest as custom v
 APP_NAME="People's Manifesto"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://your-domain
+APP_URL=https://thepeoplesmanifesto.co.ke
 APP_KEY=
 IDENTITY_HASH_KEY=
 TRUSTED_PROXIES=*
@@ -176,7 +176,7 @@ TURNSTILE_SITE_KEY=
 TURNSTILE_SECRET_KEY=
 SENTRY_LARAVEL_DSN=
 MAIL_MAILER=
-MAIL_FROM_ADDRESS=
+MAIL_FROM_ADDRESS=no-reply@thepeoplesmanifesto.co.ke
 OPERATOR_NAME=
 OPERATOR_PRIVACY_EMAIL=
 OPERATOR_ODPC_REGISTRATION=
@@ -190,9 +190,10 @@ Notes:
 
 ### 9. Domain, Turnstile and Africa's Talking
 
-1. Add your custom domain in Cloud and follow its DNS steps. HTTPS is handled by Cloud.
-2. Create a Cloudflare Turnstile widget for the domain and set its two keys. Turnstile works whether or not the domain's DNS is on Cloudflare.
-3. In Africa's Talking, set the SMS callback URL to `https://your-domain/webhooks/africastalking/{AT_WEBHOOK_TOKEN}/sms`.
+The site's address is `thepeoplesmanifesto.co.ke`. The steps in "Custom domain" at the end of this guide connect it. Then:
+
+1. Create a Cloudflare Turnstile widget with `thepeoplesmanifesto.co.ke` as its hostname and set its two keys. Turnstile works whether or not the domain's DNS is on Cloudflare.
+2. In Africa's Talking, set the SMS callback URL to `https://thepeoplesmanifesto.co.ke/webhooks/africastalking/{AT_WEBHOOK_TOKEN}/sms`.
 
 ### 10. First admin
 
@@ -210,3 +211,36 @@ The admin gets an email to set a password, then must add an authenticator app at
 - With `AT_SANDBOX=true` and `AT_USERNAME=sandbox`, sign in as a resident using the Africa's Talking simulator. Then switch to the live account and sign in with a real phone.
 - Raise a report and check it is sorted within a minute, under Admin, Report sorting.
 - Open `/horizon` as the admin and check both supervisors are running.
+
+## Custom domain: thepeoplesmanifesto.co.ke
+
+This applies to the demo site and the full setup alike. The app has no address written into its code, so the only app setting is `APP_URL`.
+
+1. In Laravel Cloud, open the environment, go to Domains and add `thepeoplesmanifesto.co.ke`. Add `www.thepeoplesmanifesto.co.ke` as well and set it to redirect to the bare domain, so both addresses work.
+2. Cloud asks where the domain's DNS is managed and then lists the exact records to create. Copy them as shown:
+   - DNS with your registrar (not Cloudflare): Cloud gives A records for the domain.
+   - DNS on Cloudflare: Cloud gives CNAME records. Cloudflare allows a CNAME on the bare domain through CNAME flattening.
+   - Either way there is a TXT record named `_cf-custom-hostname` to prove you own the domain, and an `_acme-challenge` record for the HTTPS certificate.
+3. On Cloudflare, set the `_acme-challenge` record to "DNS only" (grey cloud). If it is proxied, the certificate cannot be issued. If verification complains, set the other records to "DNS only" until Cloud shows the domain as verified, then turn the proxy back on if you want it.
+4. Wait for Cloud to show the domain as verified with a certificate. It is often within the hour, and can take up to 24 hours while DNS spreads.
+5. Set these variables and redeploy:
+
+```
+APP_URL=https://thepeoplesmanifesto.co.ke
+MAIL_FROM_ADDRESS=no-reply@thepeoplesmanifesto.co.ke
+```
+
+6. Check it from your own computer. The first should print the site's addresses, the second should print the verification value, and the page should open with a padlock:
+
+```
+dig A thepeoplesmanifesto.co.ke +short
+```
+
+```
+dig TXT _cf-custom-hostname.thepeoplesmanifesto.co.ke +short
+```
+
+Then open https://thepeoplesmanifesto.co.ke/up. It should show that the application is up. The demo banner and the sign-in page should load at https://thepeoplesmanifesto.co.ke.
+
+The old `laravel.cloud` address keeps working alongside the new one.
+
