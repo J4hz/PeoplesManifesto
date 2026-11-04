@@ -42,6 +42,7 @@ return [
         'choose_intro' => 'Ripoti zako zitaenda kwa viongozi wa wadi hii. Unaweza kuwa katika wadi moja tu kwa wakati mmoja.',
         'choose_hint' => 'Kama huna uhakika, wadi yako imeandikwa kwenye kadi yako ya mpiga kura.',
         'choose_submit' => 'Hifadhi wadi yangu',
+        'none_open' => 'Bado hakuna wadi iliyofunguliwa kwa ripoti. Tafadhali rudi baadaye.',
         'saved' => 'Wadi yako imehifadhiwa.',
         'title' => 'Masuala ya :ward',
         'intro' => 'Yamepangwa kwa idadi ya wakazi walioyaripoti, uzito wake na kasi yanavyoongezeka.',

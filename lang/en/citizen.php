@@ -42,6 +42,7 @@ return [
         'choose_intro' => 'Your reports go to the leaders of this ward. You can belong to one ward at a time.',
         'choose_hint' => 'If you are not sure, your ward is printed on your voter card.',
         'choose_submit' => 'Save my ward',
+        'none_open' => 'No wards are open for reports yet. Please check back soon.',
         'saved' => 'Your ward is saved.',
         'title' => 'Issues in :ward',
         'intro' => 'Ranked by how many residents raised them, how serious they are and how fast they are growing.',

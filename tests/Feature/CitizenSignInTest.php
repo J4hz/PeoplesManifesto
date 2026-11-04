@@ -101,3 +101,13 @@ it('shows guests the task first, not a marketing page', function () {
         ->assertSee('Phone number')
         ->assertSee('Kiuu');
 });
+
+it('says plainly when no wards are open instead of showing an empty form', function () {
+    \App\Models\Ward::query()->update(['is_active' => false]);
+    $citizen = Citizen::factory()->create(['ward_id' => null]);
+
+    $this->actingAs($citizen, 'citizen')->get('/welcome/ward')
+        ->assertOk()
+        ->assertSee('No wards are open for reports yet')
+        ->assertDontSee('Save my ward');
+});
