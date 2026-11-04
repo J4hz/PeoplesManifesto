@@ -11,6 +11,18 @@
         <x-stat-tile :value="number_format($stats['resolved'])" :label="__('leader.overview.resolved')" />
     </div>
 
+    <section class="stack">
+        <div class="section-title">
+            <h2>{{ __('leader.reports.title') }}</h2>
+            <a href="{{ route('dashboard.reports') }}">{{ __('citizen.home.see_all') }}</a>
+        </div>
+        @if ($latestReports->isEmpty())
+            <div class="card"><p class="muted">{{ __('leader.reports.empty') }}</p></div>
+        @else
+            @include('partials.report-list', ['reports' => $latestReports, 'issueRoute' => 'dashboard.clusters.show'])
+        @endif
+    </section>
+
     <section class="card stack">
         <h2>{{ __('leader.overview.brief_heading') }}</h2>
         @forelse ($briefs as $brief)

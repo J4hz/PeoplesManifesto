@@ -2,6 +2,7 @@
 
 use App\Jobs\SendSms;
 use App\Models\Citizen;
+use App\Models\Ward;
 use App\Services\IdentityHasher;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
@@ -103,7 +104,7 @@ it('shows guests the task first, not a marketing page', function () {
 });
 
 it('says plainly when no wards are open instead of showing an empty form', function () {
-    \App\Models\Ward::query()->update(['is_active' => false]);
+    Ward::query()->update(['is_active' => false]);
     $citizen = Citizen::factory()->create(['ward_id' => null]);
 
     $this->actingAs($citizen, 'citizen')->get('/welcome/ward')

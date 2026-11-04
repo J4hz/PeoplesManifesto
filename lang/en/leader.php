@@ -6,6 +6,7 @@ return [
         'overview' => 'Overview',
         'ratings' => 'Ratings of your fixes',
         'audit' => 'Audit log',
+        'reports' => 'Latest reports',
         'security' => 'Sign-in security',
         'sign_out' => 'Sign out',
     ],
@@ -116,6 +117,13 @@ return [
         'publish_draft' => 'Publish',
         'discard_draft' => 'Discard draft',
         'status_not_allowed' => 'Only the leader can mark an issue done.',
+    ],
+    'reports' => [
+        'title' => 'Latest reports',
+        'intro' => 'Every report as it comes in, newest first. Who sent it is never shown.',
+        'empty' => 'No reports yet.',
+        'hidden' => 'Text hidden because it mentions a person or a phone number. It still counts on the issue.',
+        'in_issue' => 'Grouped into',
     ],
     'ratings' => [
         'title' => 'How residents rated your fixes',

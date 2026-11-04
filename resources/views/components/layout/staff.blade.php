@@ -29,11 +29,13 @@
                     <nav class="side-nav" aria-label="{{ __('leader.nav.label') }}">
                         @can('leader-dashboard')
                             <a href="{{ route('dashboard') }}" @if ($active === 'overview') aria-current="page" @endif><x-icon name="home" /> {{ __('leader.nav.overview') }}</a>
+                            <a href="{{ route('dashboard.reports') }}" @if ($active === 'reports') aria-current="page" @endif><x-icon name="message" /> {{ __('leader.nav.reports') }}</a>
                             <a href="{{ route('dashboard.ratings') }}" @if ($active === 'ratings') aria-current="page" @endif><x-icon name="star" /> {{ __('leader.nav.ratings') }}</a>
                             <a href="{{ route('dashboard.audit') }}" @if ($active === 'audit') aria-current="page" @endif><x-icon name="file" /> {{ __('leader.nav.audit') }}</a>
                         @endcan
                         @can('admin')
                             <a href="{{ route('admin') }}" @if ($active === 'admin') aria-current="page" @endif><x-icon name="home" /> {{ __('admin.nav.overview') }}</a>
+                            <a href="{{ route('admin.reports') }}" @if ($active === 'admin-reports') aria-current="page" @endif><x-icon name="message" /> {{ __('leader.nav.reports') }}</a>
                             <a href="{{ route('admin.wards') }}" @if ($active === 'wards') aria-current="page" @endif><x-icon name="map-pin" /> {{ __('admin.nav.wards') }}</a>
                             <a href="{{ route('admin.people') }}" @if ($active === 'people') aria-current="page" @endif><x-icon name="users" /> {{ __('admin.nav.people') }}</a>
                             <a href="{{ route('admin.intake') }}" @if ($active === 'intake') aria-current="page" @endif><x-icon name="message" /> {{ __('admin.nav.intake') }}</a>

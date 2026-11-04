@@ -35,8 +35,9 @@ class Clusterer
             'ward_id' => $submission->ward_id,
             'category' => $submission->category,
             'routed_office_id' => $submission->ward->officeOfType(config("civic.routing.{$submission->category}", 'mca'))?->id,
-            'title' => $submission->ai_title ?: 'Report from residents',
-            'summary' => $submission->ai_summary,
+            'title' => $this->openingTitle($submission),
+            // A flagged report never supplies public text. The summary is written later from clean reports.
+            'summary' => $submission->contains_personal_info ? null : $submission->ai_summary,
             'status' => IssueCluster::STATUS_OPEN,
             'severity' => $submission->severity ?? 'annoying',
             'first_reported_at' => $submission->created_at,
@@ -60,6 +61,19 @@ class Clusterer
         ]);
 
         $cluster->forceFill(['last_activity_at' => now()])->save();
+    }
+
+    /**
+     * The issue title is public. If the first report names a person or a number,
+     * the issue starts with a plain title such as "Water issue in Kiuu" instead.
+     */
+    private function openingTitle(Submission $submission): string
+    {
+        if ($submission->contains_personal_info || blank($submission->ai_title)) {
+            return __('civic.category.'.$submission->category, [], 'en').' issue in '.$submission->ward->name;
+        }
+
+        return $submission->ai_title;
     }
 
     /**

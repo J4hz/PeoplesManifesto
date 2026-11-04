@@ -26,6 +26,8 @@ class LocalIntakeAnalyzer implements IntakeAnalyzer
         'environment' => ['noise', 'kelele', 'quarry', 'river', 'mto', 'flood', 'mafuriko', 'trees', 'miti'],
     ];
 
+    private const PHONE_PATTERN = '/(\+?254|\b0)\s?[17]\d{2}\s?\d{3}\s?\d{3}\b/';
+
     private const URGENT_WORDS = ['urgent', 'haraka', 'emergency', 'dharura', 'died', 'dead', 'amekufa', 'fire', 'moto', 'outbreak', 'cholera', 'kipindupindu'];
 
     private const SERIOUS_WORDS = ['week', 'wiki', 'month', 'mwezi', 'days', 'siku', 'many', 'wengi', 'every', 'kila'];
@@ -60,7 +62,9 @@ class LocalIntakeAnalyzer implements IntakeAnalyzer
         $area = collect($areaNames)->first(fn ($name) => str_contains($lower, Str::lower($name))) ?? '';
         $ward = collect($wardNames)->first(fn ($name) => str_contains($lower, Str::lower($name))) ?? '';
 
-        $clean = trim(preg_replace('/\s+/', ' ', $text));
+        $hasPhone = (bool) preg_match(self::PHONE_PATTERN, $text);
+        // The keyword analyser cannot spot names, but it can keep phone numbers out of everything it writes.
+        $clean = trim(preg_replace('/\s+/', ' ', preg_replace(self::PHONE_PATTERN, '[phone]', $text)));
         $title = $this->title($clean);
 
         return IntakeSchema::validate([
@@ -72,7 +76,7 @@ class LocalIntakeAnalyzer implements IntakeAnalyzer
             'area' => $area,
             'title' => $title !== '' ? $title : 'Report from residents',
             'summary' => Str::limit($clean, 280, ''),
-            'contains_personal_info' => (bool) preg_match('/(\+?254|0)[17]\d{8}/', $text),
+            'contains_personal_info' => $hasPhone,
             'is_actionable' => mb_strlen($clean) >= 8,
         ], $wardNames, $areaNames);
     }

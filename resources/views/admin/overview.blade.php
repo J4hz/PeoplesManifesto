@@ -11,6 +11,18 @@
         <x-stat-tile :value="number_format($unprocessed)" :label="__('admin.overview.unprocessed')" />
     </div>
 
+    <section class="stack">
+        <div class="section-title">
+            <h2>{{ __('leader.reports.title') }}</h2>
+            <a href="{{ route('admin.reports') }}">{{ __('citizen.home.see_all') }}</a>
+        </div>
+        @if ($latestReports->isEmpty())
+            <div class="card"><p class="muted">{{ __('leader.reports.empty') }}</p></div>
+        @else
+            @include('partials.report-list', ['reports' => $latestReports, 'issueRoute' => 'clusters.show'])
+        @endif
+    </section>
+
     <section class="card stack">
         <h2>{{ __('admin.overview.spend_heading') }}</h2>
         <p>{{ __('admin.overview.spend_line', ['spent' => number_format($spent, 2), 'cap' => number_format($cap, 2)]) }}</p>

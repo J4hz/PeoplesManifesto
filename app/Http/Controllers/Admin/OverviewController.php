@@ -7,11 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Citizen;
 use App\Models\IssueCluster;
 use App\Models\Submission;
+use App\Services\ReportFeed;
 use Illuminate\View\View;
 
 class OverviewController extends Controller
 {
-    public function index(SpendGuard $spend): View
+    public function index(SpendGuard $spend, ReportFeed $feed): View
     {
         return view('admin.overview', [
             'citizens' => Citizen::count(),
@@ -22,6 +23,7 @@ class OverviewController extends Controller
                 ->count(),
             'spent' => $spend->spentThisMonth(),
             'cap' => $spend->cap(),
+            'latestReports' => $feed->latest(null, 5),
         ]);
     }
 }

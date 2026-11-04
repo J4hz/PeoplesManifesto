@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureCitizenHasWard;
 use App\Http\Middleware\RequireTwoFactor;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Http\Responses\StaffHomeRedirect;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -31,7 +32,9 @@ return Application::configure(basePath: dirname(__DIR__))
             ? route('login')
             : route('citizen.sign-in'));
 
-        $middleware->redirectUsersTo(fn (Request $request) => $request->user('web') ? route('dashboard') : route('home'));
+        $middleware->redirectUsersTo(fn (Request $request) => $request->user('web')
+            ? StaffHomeRedirect::homeFor($request->user('web'))
+            : route('home'));
 
         // Africa's Talking posts form data without a CSRF token. The route checks its own secret instead.
         $middleware->validateCsrfTokens(except: ['webhooks/*']);

@@ -17,6 +17,15 @@ class SubmissionPolicy
         return $actor instanceof Citizen && $actor->ward_id !== null;
     }
 
+    /**
+     * Staff see reports as they arrive, without anything that says who sent them.
+     * Leaders and their staff are limited to their jurisdiction by the query, admins see every ward.
+     */
+    public function viewAnyAnonymous(User|Citizen $actor): bool
+    {
+        return $actor instanceof User && $actor->is_active && ($actor->worksForLeader() || $actor->isAdmin());
+    }
+
     public function view(User|Citizen $actor, Submission $submission): bool
     {
         return $actor instanceof Citizen && $this->isAuthor($actor, $submission);

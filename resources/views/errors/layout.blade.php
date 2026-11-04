@@ -13,7 +13,7 @@
             <section class="card stack">
                 <h1>{{ $title }}</h1>
                 <p>{{ $message }}</p>
-                <p><a class="btn" href="{{ url('/') }}">{{ __('errors.home') }}</a></p>
+                <p><a class="btn" href="{{ $homeUrl ?? url('/') }}">{{ $homeLabel ?? __('errors.home') }}</a></p>
             </section>
         </div>
     </main>

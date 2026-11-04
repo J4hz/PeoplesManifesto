@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
+use App\Http\Responses\StaffHomeRedirect;
 use App\Models\User;
 use App\Services\AuditLogger;
 use Illuminate\Auth\Events\Login;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\TwoFactorLoginResponse;
 use Laravel\Fortify\Events\RecoveryCodesGenerated;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
@@ -22,6 +25,12 @@ use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->singleton(LoginResponse::class, StaffHomeRedirect::class);
+        $this->app->singleton(TwoFactorLoginResponse::class, StaffHomeRedirect::class);
+    }
+
     public function boot(): void
     {
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);

@@ -8,13 +8,14 @@ use App\Models\IssueCluster;
 use App\Models\SubmissionAuthor;
 use App\Models\WeeklyBrief;
 use App\Services\Jurisdiction;
+use App\Services\ReportFeed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class OverviewController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ReportFeed $feed): View
     {
         $user = $request->user('web')->load('leader.office');
         $scope = new Jurisdiction($user);
@@ -50,6 +51,7 @@ class OverviewController extends Controller
             'clusters' => $clusters,
             'briefs' => $briefs,
             'stats' => $this->stats($scope),
+            'latestReports' => $feed->latest($wardFilter ? collect([$wardFilter]) : $scope->wardIds(), 5),
         ]);
     }
 

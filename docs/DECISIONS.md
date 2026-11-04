@@ -25,6 +25,10 @@ One line of reasoning for each choice made without asking.
 
 ## Issues and ranking
 
+* Staff see every written complaint as it arrives in a Latest reports list: leaders and their staff for their jurisdiction, admins for every ward. The list never loads the identity table, so it cannot show who sent a report, and text flagged for personal details is replaced with a note.
+* An issue's title is public. When the report that starts an issue is flagged for personal details, the issue opens with a plain title such as "Water issue in Kiuu". The keyword analyser also masks phone numbers in everything it writes.
+* After the authenticator code, admins land on the admin area and leaders and staff on their dashboard.
+
 * A "+" (add your voice) creates a submission of kind `voice` linked straight to the cluster. It counts as a distinct resident and skips the AI.
 * The citizen's chosen category and severity win over the model's guesses. The model fills what the citizen left blank. People know their own situation, and it limits what a prompt injection can change.
 * The model may name a different pilot ward if the text clearly says so. The answer must match the supplied list, otherwise the citizen's ward stands.

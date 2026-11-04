@@ -65,6 +65,7 @@ Route::middleware(['auth:web', 'two-factor', 'can:leader-dashboard'])->prefix('d
     Route::post('/updates/{update}/publish', [Leader\UpdateController::class, 'publish'])->name('.updates.publish');
     Route::delete('/updates/{update}', [Leader\UpdateController::class, 'destroy'])->name('.updates.destroy');
     Route::get('/submissions/{submission}/photo', [PhotoController::class, 'leaderSubmission'])->name('.submissions.photo');
+    Route::get('/reports', [Leader\ReportFeedController::class, 'index'])->name('.reports');
     Route::get('/ratings', [Leader\RatingRecordController::class, 'index'])->name('.ratings');
     Route::get('/audit', [Leader\AuditLogController::class, 'index'])->name('.audit');
 });
@@ -78,6 +79,7 @@ Route::middleware(['auth:web', 'two-factor', 'can:admin'])->prefix('admin')->nam
     Route::post('/people/leaders', [Admin\PeopleController::class, 'storeLeader'])->name('.people.leaders.store');
     Route::post('/people/staff', [Admin\PeopleController::class, 'storeStaff'])->name('.people.staff.store');
     Route::patch('/people/{user}/active', [Admin\PeopleController::class, 'toggleActive'])->name('.people.active');
+    Route::get('/reports', [Admin\ReportFeedController::class, 'index'])->name('.reports');
     Route::get('/intake', [Admin\IntakeController::class, 'index'])->name('.intake');
     Route::post('/intake/{submission}/retry', [Admin\IntakeController::class, 'retry'])->name('.intake.retry');
     Route::get('/ai-usage', [Admin\AiUsageController::class, 'index'])->name('.ai-usage');
