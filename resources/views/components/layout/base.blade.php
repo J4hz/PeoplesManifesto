@@ -13,6 +13,9 @@
 </head>
 <body>
     <a class="skip-link" href="#main">{{ __('civic.skip_to_content') }}</a>
+    @if (config('civic.demo.enabled'))
+        <div class="demo-banner" role="note">{{ __('civic.demo.banner') }}</div>
+    @endif
     {{ $slot }}
     @stack('scripts')
 </body>

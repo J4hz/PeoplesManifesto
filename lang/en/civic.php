@@ -57,6 +57,10 @@ return [
     'areas_count' => '{1} :count area|[2,*] :count areas',
     'stars_count' => '{1} :count star|[2,*] :count stars',
     'stars_out_of_five' => ':stars out of 5 stars',
+    'demo' => [
+        'banner' => 'Demo site. Reports here do not reach any real leader. Please do not include real names, phone numbers or private details.',
+        'code' => 'Demo site: your code is :code. On the live site it arrives by SMS.',
+    ],
     'none_yet' => 'None yet',
     'skip_to_content' => 'Skip to content',
     'pagination' => 'Pages',

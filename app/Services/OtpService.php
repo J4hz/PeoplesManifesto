@@ -10,7 +10,10 @@ class OtpService
 {
     public function __construct(private readonly IdentityHasher $hasher) {}
 
-    public function issue(string $phone, string $locale = 'en'): void
+    /**
+     * Returns the code so demo mode can show it on screen. Everywhere else it only travels by SMS.
+     */
+    public function issue(string $phone, string $locale = 'en'): string
     {
         $hash = $this->hasher->phone($phone);
 
@@ -30,6 +33,8 @@ class OtpService
             'code' => $code,
             'minutes' => config('civic.otp.ttl_minutes'),
         ], $locale));
+
+        return $code;
     }
 
     public function verify(string $phone, string $code): bool

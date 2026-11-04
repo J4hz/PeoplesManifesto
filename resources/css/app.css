@@ -978,3 +978,13 @@ figure.quote blockquote {
 .nowrap {
     white-space: nowrap;
 }
+
+.demo-banner {
+    background: var(--amber-light);
+    color: var(--amber);
+    border-bottom: 1px solid #f0d6b4;
+    padding: 10px 16px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+}

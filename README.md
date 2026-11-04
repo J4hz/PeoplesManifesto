@@ -87,6 +87,7 @@ Every value lives in `.env`. `.env.example` lists them all with comments.
 | `AWS_*` | The private bucket for photos when `PHOTOS_DISK=s3`. |
 | `BACKUP_DISK`, `BACKUP_ARCHIVE_PASSWORD`, `BACKUP_S3_*`, `BACKUP_NOTIFY_EMAIL` | Encrypted daily backups. See `docs/RESTORE.md`. |
 | `OPERATOR_NAME`, `OPERATOR_PRIVACY_EMAIL`, `OPERATOR_ODPC_REGISTRATION` | Shown on the privacy notice once set. |
+| `DEMO_MODE`, `DEMO_STAFF_PASSWORD` | For a demo site only: sign-in codes show on screen, every page carries a demo banner, and `db:seed` loads the demo accounts with this password. Needs `APP_ENV=demo`. The app will not start with it on in production. |
 
 ## Deploy
 
@@ -94,7 +95,7 @@ Production needs PHP 8.3, PostgreSQL with pgvector, Redis, a queue worker runnin
 
 ### Laravel Cloud
 
-This is the planned host. The full checklist is in `docs/deploy/laravel-cloud.md`. In short:
+This is the planned host. For a quick demo site with no SMS or AI keys, follow "Demo site" at the top of `docs/deploy/laravel-cloud.md`. The full production checklist is in the same file. In short:
 
 1. Create the application from this repository in the EU Central (Frankfurt) region, on PHP 8.3 or newer.
 2. Attach a Laravel Serverless Postgres database (pgvector is supported, and the migrations create the extension) and a Valkey store. Turn database hibernation off for production so SMS callbacks are not slowed by a cold start.

@@ -10,8 +10,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(PilotAreaSeeder::class);
 
-        // Demo accounts and reports exist only on developer machines, never in production.
-        if (app()->environment(['local', 'testing'])) {
+        // Demo accounts and reports exist only on developer machines and demo sites, never in production.
+        if (app()->environment(['local', 'testing']) || config('civic.demo.enabled')) {
             $this->call(DemoSeeder::class);
         }
     }

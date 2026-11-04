@@ -2,6 +2,9 @@
     <section class="card stack">
         <h1>{{ __('citizen.auth.code_title') }}</h1>
         <p>{{ __('citizen.auth.code_intro', ['phone' => $maskedPhone, 'minutes' => config('civic.otp.ttl_minutes')]) }}</p>
+        @if ($demoCode)
+            <div class="notice notice-warn">{{ __('civic.demo.code', ['code' => $demoCode]) }}</div>
+        @endif
         <form method="POST" action="{{ route('citizen.sign-in.verify') }}" class="stack" novalidate>
             @csrf
             <div class="field">

@@ -26,8 +26,9 @@ use Illuminate\Support\Facades\Hash;
  * and testing environments. The people, numbers and reports are made up for
  * development and must never be loaded into production.
  *
- * Every demo staff account has the password "password" and the authenticator
- * secret JBSWY3DPEHPK3PXP, which you can add to an authenticator app by hand.
+ * Every demo staff account has the password from DEMO_STAFF_PASSWORD ("password"
+ * when unset) and the authenticator secret JBSWY3DPEHPK3PXP, which you can add to
+ * an authenticator app by hand.
  */
 class DemoSeeder extends Seeder
 {
@@ -147,7 +148,7 @@ class DemoSeeder extends Seeder
     {
         return User::updateOrCreate(['email' => $email], [
             'name' => $name,
-            'password' => Hash::make('password'),
+            'password' => Hash::make((string) config('civic.demo.staff_password')),
             'role' => $role,
             'leader_id' => $leaderId,
             'is_active' => true,

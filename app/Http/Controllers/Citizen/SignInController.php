@@ -24,9 +24,13 @@ class SignInController extends Controller
     public function store(RequestOtpRequest $request, OtpService $otp): RedirectResponse
     {
         $phone = $request->phone();
-        $otp->issue($phone, app()->getLocale());
+        $code = $otp->issue($phone, app()->getLocale());
 
         $request->session()->put('otp_phone', $phone);
+
+        if (config('civic.demo.enabled')) {
+            $request->session()->put('demo_code', $code);
+        }
 
         return redirect()->route('citizen.sign-in.verify');
     }
@@ -39,6 +43,7 @@ class SignInController extends Controller
 
         return view('citizen.auth.verify', [
             'maskedPhone' => PhoneNumber::mask((string) $request->session()->get('otp_phone')),
+            'demoCode' => config('civic.demo.enabled') ? $request->session()->get('demo_code') : null,
         ]);
     }
 
@@ -56,7 +61,7 @@ class SignInController extends Controller
         );
         $citizen->forceFill(['verified_at' => $citizen->verified_at ?? now(), 'last_seen_at' => now()])->save();
 
-        $request->session()->forget('otp_phone');
+        $request->session()->forget(['otp_phone', 'demo_code']);
         Auth::guard('citizen')->login($citizen, remember: true);
         $request->session()->regenerate();
 

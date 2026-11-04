@@ -57,6 +57,10 @@ return [
     'areas_count' => '{1} eneo :count|[2,*] maeneo :count',
     'stars_count' => '{1} nyota :count|[2,*] nyota :count',
     'stars_out_of_five' => 'nyota :stars kati ya 5',
+    'demo' => [
+        'banner' => 'Hili ni jukwaa la majaribio. Ripoti zinazotumwa hapa hazifiki kwa kiongozi yeyote halisi. Tafadhali usiweke majina halisi, nambari za simu wala taarifa za faragha.',
+        'code' => 'Jukwaa la majaribio: nambari yako ni :code. Kwenye jukwaa halisi inakuja kwa SMS.',
+    ],
     'none_yet' => 'Bado',
     'skip_to_content' => 'Ruka hadi maudhui',
     'pagination' => 'Kurasa',

@@ -94,6 +94,16 @@ return [
     | Who runs the platform. Shown on the privacy notice. Sentences that depend
     | on an empty value are left out rather than filled with placeholders.
     */
+    /*
+    | Demo mode is for showing the platform to people without real SMS. Sign-in
+    | codes appear on screen, every page says it is a demo, and the demo
+    | accounts can be seeded. The app refuses to start with it on in production.
+    */
+    'demo' => [
+        'enabled' => (bool) env('DEMO_MODE', false),
+        'staff_password' => env('DEMO_STAFF_PASSWORD', 'password'),
+    ],
+
     'operator' => [
         // TODO: the registered name of the organisation that runs the platform.
         'name' => env('OPERATOR_NAME'),

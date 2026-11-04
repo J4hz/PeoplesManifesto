@@ -101,6 +101,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Demo mode shows sign-in codes on screen. It must never run against real residents.
+        if (config('civic.demo.enabled') && $this->app->isProduction()) {
+            throw new RuntimeException('DEMO_MODE cannot be used with APP_ENV=production. Use APP_ENV=demo for a demo site.');
+        }
+
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
 
         if (filled(config('app.trusted_proxies'))) {

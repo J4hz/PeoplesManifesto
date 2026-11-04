@@ -58,6 +58,8 @@ One line of reasoning for each choice made without asking.
 
 ## Hosting
 
+* A demo mode (`DEMO_MODE=true` with `APP_ENV=demo`) shows sign-in codes on screen and puts a banner on every page, so people can try the resident side without an SMS account. The app refuses to start with it on in production.
+
 * Laravel Cloud is the chosen host. Photos and backups go to private Cloud buckets because the Cloud file system does not last between deploys. The scheduler and Horizon run on a worker cluster that never sleeps, so the reopen check and weekly briefs run on time. Forge and Render instructions stay in the README as fallbacks.
 
 * Photos use the `local` disk on a single VPS and a private S3 bucket on Render, where web and worker containers do not share a disk. Either way they are streamed through a policy check, never linked directly.
